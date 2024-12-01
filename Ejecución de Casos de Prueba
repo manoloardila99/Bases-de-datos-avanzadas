@@ -1,0 +1,14 @@
+// Procedimiento
+// Prueba de Disponibilidad del Nodo Primario
+
+// Desconectar el nodo primario con db.shutdownServer().
+// Observa el cambio de roles con rs.status().
+// Verifica que un nodo secundario asuma el rol de primario.
+
+// Inserta un documento en el nodo primario
+
+db.deportistas.insertOne({ nombre: "Jugador Prueba", equipo_id: ObjectId(), goles: 3 });
+
+// Conéctate a los secundarios y verifica que el documento exista
+
+db.deportistas.find();
