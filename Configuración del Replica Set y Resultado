@@ -1,0 +1,166 @@
+// Ejecución de Casos de Prueba y Reporte
+// Procedimiento
+// Prueba de Disponibilidad del Nodo Primario
+// Desconectar el nodo primario con db.shutdownServer().
+// Observa el cambio de roles con rs.status().
+// Verifica que un nodo secundario asuma el rol de primario.
+
+// Configuración del Replica Set
+// 1. Inicialización del Replica Set
+// Comando ejecutado en el nodo primario
+
+rs.initiate({
+    _id: "rsChampions",
+    members: [
+        { _id: 0, host: "localhost:27017" }, // Nodo primario
+        { _id: 1, host: "localhost:27018" }, // Nodo secundario 1
+        { _id: 2, host: "localhost:27019" }  // Nodo secundario 2
+    ]
+});
+
+// Resultado esperado
+{
+    "ok": 1,
+    "operationTime": Timestamp(1690882822, 1),
+    "$clusterTime": {
+        "clusterTime": Timestamp(1690882822, 1),
+        "signature": {
+            "hash": "HASH_PLACEHOLDER",
+            "keyId": NumberLong("KEY_ID_PLACEHOLDER")
+        }
+    }
+}
+
+// 2. Verificación del Replica Set
+// Comando ejecutado en cualquier nodo
+
+rs.status();
+
+// Resultado esperado (resumen)
+
+{
+    "set": "rsChampions",
+    "date": ISODate("2023-11-30T10:00:00Z"),
+    "myState": 1,
+    "members": [
+        {
+            "_id": 0,
+            "name": "localhost:27017",
+            "stateStr": "PRIMARY",
+            "uptime": 3600
+        },
+        {
+            "_id": 1,
+            "name": "localhost:27018",
+            "stateStr": "SECONDARY",
+            "uptime": 3600
+        },
+        {
+            "_id": 2,
+            "name": "localhost:27019",
+            "stateStr": "SECONDARY",
+            "uptime": 3600
+        }
+    ]
+}
+
+// Prueba 1: Inserción de Datos en el Nodo Primario
+// Comando ejecutado en el nodo primario
+
+use champions_league;
+db.deportistas.insertOne({
+    nombre: "Kylian Mbappé",
+    equipo_id: ObjectId("650c488b08b3c20d44e5a012"),
+    posicion: "Delantero",
+    nacionalidad: "Francia",
+    estadisticas: {
+        goles_champions_2023: 7,
+        asistencias_champions_2023: 3,
+        tarjetas_amarillas_champions_2023: 1,
+        tarjetas_rojas_champions_2023: 0
+    }
+});
+
+// Resultado esperado
+{
+    "acknowledged": true,
+    "insertedId": ObjectId("650c488b08b3c20d44e5b001")
+}
+
+
+// Prueba 2: Verificación de Replicación en Nodos Secundarios
+// Conexión a nodo secundario
+
+use champions_league;
+db.deportistas.find({ nombre: "Kylian Mbappé" });
+
+// Resultado esperado
+
+{
+    "_id": ObjectId("650c488b08b3c20d44e5b001"),
+    "nombre": "Kylian Mbappé",
+    "equipo_id": ObjectId("650c488b08b3c20d44e5a012"),
+    "posicion": "Delantero",
+    "nacionalidad": "Francia",
+    "estadisticas": {
+        "goles_champions_2023": 7,
+        "asistencias_champions_2023": 3,
+        "tarjetas_amarillas_champions_2023": 1,
+        "tarjetas_rojas_champions_2023": 0
+    }
+}
+
+// Prueba 3: Desconexión del Nodo Primario
+// Apaga el nodo primario (en localhost:27017)
+
+db.shutdownServer();
+
+// Conexión un nodo secundario y verificación del estado del Replica Set
+
+rs.status();
+
+// Resultado esperado
+
+{
+    "set": "rsChampions",
+    "myState": 1,
+    "members": [
+        {
+            "_id": 1,
+            "name": "localhost:27018",
+            "stateStr": "PRIMARY",
+            "uptime": 1200
+        },
+        {
+            "_id": 2,
+            "name": "localhost:27019",
+            "stateStr": "SECONDARY",
+            "uptime": 1200
+        }
+    ]
+}
+
+// El nodo localhost:27018 asume el rol de primario automáticamente
+
+
+// Prueba 4: Reconexión de un Nodo Secundario
+// Reconexión del nodo previamente desconectado y verificación de su estado
+
+rs.status();
+
+// Resultado esperado
+
+{
+    "_id": 0,
+    "name": "localhost:27017",
+    "stateStr": "SECONDARY",
+    "uptime": 200,
+    "syncingTo": "localhost:27018"
+}
+// El nodo reconectado (antes primario) se sincroniza con los datos actuales del nuevo primario
+
+
+
+
+
+
