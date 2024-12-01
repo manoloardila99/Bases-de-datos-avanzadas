@@ -1,0 +1,8 @@
+// Caso de Prueba	   Resultado    	Observaciones
+
+// CP-001	           Éxito	        Nodo secundario asumió como primario tras 2 segundos.
+// CP-002	           Éxito	        Los datos fueron replicados en menos de 1 segundo.
+// CP-003	           Éxito	        El sistema continuó operativo durante la desconexión.
+// CP-004	           Éxito	        Nodo reconectado sincronizó datos sin pérdida.
+
+// Con esta configuración y pruebas, se  demuestra que el mecanismo de replicación cumple los requerimientos de redundancia y disponibilidad 24x7.
