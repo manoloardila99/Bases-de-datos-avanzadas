@@ -1,0 +1,27 @@
+// asegurar redundancia y disponibilidad
+// Configuración del Replica Set - Inicializa los nodos MongoDB en modo de replicación.
+replication:
+  replSetName: "rsChampions"
+
+// Inicia los nodos MongoDB.
+mongod --config /path/to/mongod.conf
+    
+// Conecta al nodo primario y configura el Replica Set. - Accede a MongoDB desde el nodo principal
+
+mongo --host localhost --port 27017
+
+// Inicializa el Replica Set (BD de campeonato)
+
+rs.initiate({
+    _id: "rsChampions",
+    members: [
+        { _id: 0, host: "primary_host:27017" },
+        { _id: 1, host: "secondary_host_1:27018" },
+        { _id: 2, host: "secondary_host_2:27019" }
+    ]
+});
+
+// Verifica la configuración del Replica Set
+
+rs.status();
+
