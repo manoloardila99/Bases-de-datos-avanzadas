@@ -1,5 +1,7 @@
+//Estrategia de Replicación y Comandos
 // asegurar redundancia y disponibilidad
 // Configuración del Replica Set - Inicializa los nodos MongoDB en modo de replicación.
+
 replication:
   replSetName: "rsChampions"
 
